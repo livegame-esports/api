@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -47,13 +46,14 @@ class AuthController extends Controller
         $request['password'] = Hash::make($request->input('password'));
         $user = User::query()->create($request->all());
 
-        $token = $user->createToken($request->input('username'));
+        $token = $user->createToken($user->id)
+            ->plainTextToken;
 
         return response()
             ->json([
                 'status' => true,
                 'user' => $user,
-                'token' => $token->plainTextToken,
+                'token' => $token,
             ]);
     }
 
@@ -87,7 +87,8 @@ class AuthController extends Controller
         }
 
         $user = Auth::user();
-        $token = $user->createToken($user->username)->plainTextToken;
+        $token = $user->createToken($user->id)
+            ->plainTextToken;
 
         return response()->json([
             'status' => true,
